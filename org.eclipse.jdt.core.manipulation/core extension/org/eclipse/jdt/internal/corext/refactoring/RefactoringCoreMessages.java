@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -31,9 +31,13 @@ public final class RefactoringCoreMessages extends NLS {
 
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.refactoring.refactoring";//$NON-NLS-1$
 
+	public static String CallInliner_cannot_synchronize_error;
+
 	public static String CallInliner_cast_analysis_error;
 
 	public static String CallInliner_constructors;
+
+	public static String CallInliner_create_sync_block_error;
 
 	public static String CallInliner_execution_flow;
 
@@ -52,6 +56,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CallInliner_simple_functions;
 
 	public static String CallInliner_super_into_this_expression;
+
+	public static String CallInliner_unexpected_model_exception;
 
 	public static String Change_does_not_exist;
 
@@ -553,6 +559,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_cannot_extract_null_type;
 
+	public static String ExtractMethodAnalyzer_cannot_extract_return;
+
 	public static String ExtractMethodAnalyzer_cannot_extract_switch_case;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_type_reference;
@@ -564,6 +572,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractMethodAnalyzer_cannot_extract_variable_declaration_fragment_from_field;
 
 	public static String ExtractMethodAnalyzer_cannot_extract_yield;
+
+	public static String ExtractMethodAnalyzer_cannot_extract_final_field_assignment;
 
 	public static String ExtractMethodAnalyzer_compile_errors;
 
@@ -850,6 +860,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineMethodRefactoring_SourceAnalyzer_abstract_methods;
 
 	public static String InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_package_private;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_private;
+
+	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_accesses_protected;
 
 	public static String InlineMethodRefactoring_SourceAnalyzer_methoddeclaration_has_errors;
 
@@ -1303,6 +1319,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_add_moved_method;
 
+	public static String MoveInstanceMethodProcessor_cannot_access_or_adjust;
+
 	public static String MoveInstanceMethodProcessor_cannot_be_moved;
 
 	public static String MoveInstanceMethodProcessor_checking;
@@ -1319,7 +1337,17 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveInstanceMethodProcessor_inline_overridden;
 
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_protected;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_has_errors;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_package_private;
+
+	public static String MoveInstanceMethodProcessor_methoddeclaration_accesses_private;
+
 	public static String MoveInstanceMethodProcessor_method_already_exists;
+
+	public static String MoveInstanceMethodProcessor_method_final_to_interface;
 
 	public static String MoveInstanceMethodProcessor_method_name_pattern;
 
@@ -1791,6 +1819,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String RenameMethodRefactoring_not_in_model;
 
+	public static String RenameMethodRefactoring_overrides_static_name;
+
+	public static String RenameMethodRefactoring_overrides_static_name2;
+
 	public static String RenameMethodRefactoring_same_name;
 
 	public static String RenameMethodRefactoring_same_name2;
@@ -2042,6 +2074,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgPolicyFactory_cannot;
 
 	public static String ReorgPolicyFactory_cannot_modify;
+
+	public static String ReorgPolicyFactory_cannot_move_interface_member;
 
 	public static String ReorgPolicyFactory_cannot_move_package_to_parent;
 

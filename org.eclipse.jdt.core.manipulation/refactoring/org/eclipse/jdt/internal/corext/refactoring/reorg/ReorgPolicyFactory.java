@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -820,7 +820,7 @@ public final class ReorgPolicyFactory {
 			if (resDest instanceof IContainer)
 				return (IContainer) resDest;
 			if (resDest instanceof IFile)
-				return ((IFile) resDest).getParent();
+				return resDest.getParent();
 			return null;
 		}
 
@@ -2366,6 +2366,11 @@ public final class ReorgPolicyFactory {
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
 					}
 					parent= parent.getParent();
+				}
+				if (element instanceof IMember member && member.getParent() instanceof IType parentType && parentType.isInterface()) {
+					if (!(destination instanceof IType destType) || !destType.isInterface()) {
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot_move_interface_member);
+					}
 				}
 			}
 

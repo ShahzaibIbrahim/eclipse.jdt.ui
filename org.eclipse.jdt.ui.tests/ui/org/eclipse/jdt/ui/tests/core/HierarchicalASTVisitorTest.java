@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -471,10 +471,11 @@ public class HierarchicalASTVisitorTest {
 		}
 
 		private void registerCall(Class<? extends ASTNode> nodeClassForMethod) {
-			assertNull("The invocation of a visit(XX) method in HierarchicalASTVisitor has caused " +
-					"more than one other visit(XX) method to be called.  Every visit(XX) method in " +
-					"HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), " +
-					"where YY is the superclass of XX.", fNodeClassForCalledMethod);
+			assertNull("""
+				The invocation of a visit(XX) method in HierarchicalASTVisitor has caused \
+				more than one other visit(XX) method to be called.  Every visit(XX) method in \
+				HierarchicalASTVisitor, except visit(ASTNode), should simply call visit(YY), \
+				where YY is the superclass of XX.""", fNodeClassForCalledMethod);
 			fNodeClassForCalledMethod= nodeClassForMethod;
 		}
 	}

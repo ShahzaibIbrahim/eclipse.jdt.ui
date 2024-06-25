@@ -16,7 +16,7 @@
   <parent>
     <artifactId>eclipse.jdt.ui</artifactId>
     <groupId>eclipse.jdt.ui</groupId>
-    <version>4.32.0-SNAPSHOT</version>
+    <version>4.33.0-SNAPSHOT</version>
   </parent>
   <groupId>org.eclipse.jdt.feature</groupId>
   <artifactId>org.eclipse.jdt.ui.unittest.junit.feature</artifactId>
@@ -27,7 +27,6 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-source-plugin</artifactId>
-        <version>${tycho.version}</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -41,7 +40,6 @@
       <plugin>
         <groupId>org.eclipse.tycho</groupId>
         <artifactId>tycho-p2-plugin</artifactId>
-        <version>${tycho.version}</version>
         <executions>
           <execution>
             <id>attach-p2-metadata</id>

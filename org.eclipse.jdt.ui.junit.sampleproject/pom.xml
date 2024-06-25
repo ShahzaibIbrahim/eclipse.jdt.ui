@@ -19,7 +19,7 @@
 	<parent>
 		<artifactId>eclipse.jdt.ui</artifactId>
 		<groupId>eclipse.jdt.ui</groupId>
-		<version>4.32.0-SNAPSHOT</version>
+		<version>4.33.0-SNAPSHOT</version>
 	</parent>
 	<groupId>org.eclipse.jdt.ui</groupId>
 	<artifactId>org.eclipse.jdt.ui.junit.sampleproject</artifactId>
@@ -67,7 +67,7 @@
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>license-maven-plugin</artifactId>
-				<version>2.0.0</version>
+				<version>2.4.0</version>
 				<configuration>
 					<verbose>true</verbose>
 					<inceptionYear>2020</inceptionYear>

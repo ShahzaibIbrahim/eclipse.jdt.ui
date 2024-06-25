@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -47,6 +47,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -80,8 +81,10 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchExpression;
 import org.eclipse.jdt.core.dom.SwitchStatement;
+import org.eclipse.jdt.core.dom.SynchronizedStatement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
@@ -263,6 +266,7 @@ public class CallInliner {
 			JavaManipulationPlugin.log(exception);
 		}
 		checkInvocationContext(result, severity);
+		checkAccessCompatibility(result, severity);
 
 		return result;
 	}
@@ -312,6 +316,17 @@ public class CallInliner {
 					RefactoringCoreMessages.CallInliner_super_into_this_expression,
 					JavaStatusContext.create(fCUnit, fInvocation)));
 			}
+		}
+	}
+
+	private void checkAccessCompatibility(RefactoringStatus result, int severity) {
+		try {
+			result.merge(fSourceProvider.checkAccessCompatible(fTargetNode));
+		} catch (JavaModelException e) {
+			result.addEntry(new RefactoringStatusEntry(
+					severity,
+					RefactoringCoreMessages.CallInliner_unexpected_model_exception,
+					JavaStatusContext.create(fCUnit, fInvocation)));
 		}
 	}
 
@@ -460,6 +475,14 @@ public class CallInliner {
 		}
 
 		addNewLocals(textEditGroup);
+
+		// if we are replacing a single method invocation which is in an implicit yield statement
+		// of a SwitchExpression, we need to check if we are about to replace it with a non-implicit
+		// yield statement in which case, we need to remove the yield qualifier.
+		if (fContext.callMode == ASTNode.YIELD_STATEMENT && fTargetNode instanceof YieldStatement yieldStatement
+				&& yieldStatement.isImplicit() && fBlock == null && blocks.length > 0 && blocks[0].startsWith("yield ")) { //$NON-NLS-1$
+			blocks[0]= blocks[0].substring(6);
+		}
 		replaceCall(result, blocks, textEditGroup);
 		return result;
 	}
@@ -637,12 +660,19 @@ public class CallInliner {
 							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
 					} else {
 						node= fRewrite.getAST().newExpressionStatement(
-							(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
+								(Expression)fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION));
+					}
+					if (fSourceProvider.isSynchronized()) {
+						node= createSyncBlock(node, status);
 					}
 				} else {
 					node= null;
 				}
 			} else if (fTargetNode instanceof Expression) {
+				if (fSourceProvider.isSynchronized()) {
+					status.addWarning(RefactoringCoreMessages.CallInliner_cannot_synchronize_error,
+							JavaStatusContext.create(fCUnit, fInvocation));
+				}
 				node= fRewrite.createStringPlaceholder(block, ASTNode.METHOD_INVOCATION);
 
 				// fixes bug #24941
@@ -677,8 +707,14 @@ public class CallInliner {
 				} else {
 					node= fRewrite.createStringPlaceholder(block, ASTNode.YIELD_STATEMENT);
 				}
+				if (fSourceProvider.isSynchronized()) {
+					node= createSyncBlock(node, status);
+				}
 			} else {
 				node= fRewrite.createStringPlaceholder(block, ASTNode.RETURN_STATEMENT);
+				if (fSourceProvider.isSynchronized()) {
+					node= createSyncBlock(node, status);
+				}
 			}
 
 			// Now replace the target node with the source node
@@ -696,6 +732,34 @@ public class CallInliner {
 				}
 			}
 		}
+	}
+
+	private ASTNode createSyncBlock(ASTNode node, RefactoringStatus status) {
+		AST ast= fRewrite.getAST();
+		SynchronizedStatement sync=
+				ast.newSynchronizedStatement();
+		Expression exp= Invocations.getExpression(fInvocation);
+		if (exp != null) {
+			sync.setExpression((Expression)fRewrite.createCopyTarget(exp));
+		} else if (fSourceProvider.isStatic()) {
+			TypeLiteral literal= ast.newTypeLiteral();
+			ITypeBinding binding= ASTNodes.getEnclosingType(fSourceProvider.getDeclaration());
+			if (binding == null) {
+				status.addError(RefactoringCoreMessages.CallInliner_cast_analysis_error,
+						JavaStatusContext.create(fCUnit, fInvocation));
+				return null;
+			}
+			Type type= fImportRewrite.addImport(binding, ast);
+			literal.setType(type);
+			sync.setExpression(literal);
+		} else {
+			sync.setExpression(ast.newThisExpression());
+		}
+		Block newBlock= ast.newBlock();
+		sync.setBody(newBlock);
+		newBlock.statements().add(node);
+		node= sync;
+		return node;
 	}
 
 	/**

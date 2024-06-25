@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2023 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -105,6 +105,10 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 				break;
 			case INVALID_SELECTION:
 				if (!status.isOK())
+					return;
+				break;
+			case WARNING_FOR_SELECTION:
+				if (!status.hasWarning())
 					return;
 				break;
 			case COMPARE_WITH_OUTPUT:
@@ -1651,6 +1655,11 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 		localsTest();
 	}
 
+	@Test
+	public void test579() throws Exception {
+		localsTest();
+	}
+
 	//---- Test expressions
 
 	@Test
@@ -1834,7 +1843,7 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void test700() throws Exception {
-		returnTest();
+		invalidSelectionTest();
 	}
 
 	@Test
@@ -2118,6 +2127,11 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 
 	@Test
 	public void test769() throws Exception {
+		branchTest();
+	}
+
+	@Test
+	public void test770() throws Exception {
 		branchTest();
 	}
 
@@ -2679,6 +2693,31 @@ public class ExtractMethodTests extends AbstractJunit4SelectionTestCase {
 	//--- Test Issues
 	@Test
 	public void testIssue671() throws Exception {
+		validSelectionTestChecked();
+	}
+
+	@Test
+	public void testIssue1355() throws Exception {
+		invalidSelectionTest();
+	}
+
+	@Test
+	public void testIssue1356_1() throws Exception {
+		invalidSelectionTest();
+	}
+
+	@Test
+	public void testIssue1356_2() throws Exception {
+		invalidSelectionTest();
+	}
+
+	@Test
+	public void testIssue1357_1() throws Exception {
+		validSelectionTestChecked();
+	}
+
+	@Test
+	public void testIssue1357_2() throws Exception {
 		validSelectionTestChecked();
 	}
 }

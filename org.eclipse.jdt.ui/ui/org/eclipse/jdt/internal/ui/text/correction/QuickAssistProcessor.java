@@ -173,7 +173,7 @@ import org.eclipse.jdt.internal.corext.fix.SplitVariableFixCore;
 import org.eclipse.jdt.internal.corext.fix.StringConcatToTextBlockFixCore;
 import org.eclipse.jdt.internal.corext.fix.SwitchExpressionsFixCore;
 import org.eclipse.jdt.internal.corext.fix.TypeParametersFixCore;
-import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFix;
+import org.eclipse.jdt.internal.corext.fix.UnnecessaryArrayCreationFixCore;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFixCore;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTesterCore;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
@@ -205,13 +205,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ConvertLoopCleanUp;
-import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUp;
-import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUp;
-import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUp;
-import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.DoWhileRatherThanWhileCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.LambdaExpressionsCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.StringConcatToTextBlockCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.SwitchExpressionsCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.TypeParametersCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUpCore;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock;
 import org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key;
@@ -310,6 +310,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					|| getGenerateForLoopProposals(context, coveringNode, null, null)
 					|| getUnnecessaryArrayCreationProposal(context, coveringNode, null)
 					|| getExtractVariableProposal(context, false, null)
+					|| getExtractAnonymousClassProposal(context, coveringNode, null)
 					|| getExtractMethodProposal(context, coveringNode, false, null)
 					|| getExtractMethodFromLambdaProposal(context, coveringNode, false, null)
 					|| getInlineLocalProposal(context, coveringNode, null)
@@ -387,6 +388,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getArrayInitializerToArrayCreation(context, coveringNode, resultingCollections);
 				getCreateInSuperClassProposals(context, coveringNode, resultingCollections);
 				getExtractVariableProposal(context, problemsAtLocation, resultingCollections);
+				getExtractAnonymousClassProposal(context, coveringNode, resultingCollections);
 				getExtractMethodProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getExtractMethodFromLambdaProposal(context, coveringNode, problemsAtLocation, resultingCollections);
 				getInlineLocalProposal(context, coveringNode, resultingCollections);
@@ -611,6 +613,50 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		return false;
 	}
 
+	private boolean getExtractAnonymousClassProposal(IInvocationContext context, ASTNode coveringNode, ArrayList<ICommandAccess> proposals) throws CoreException {
+		AnonymousClassDeclaration decl= ASTNodes.getFirstAncestorOrNull(coveringNode, AnonymousClassDeclaration.class);
+		if (decl != null) {
+			ASTNode parent= decl.getParent();
+			if (parent instanceof ClassInstanceCreation expression) {
+
+				ITypeBinding binding= expression.resolveTypeBinding();
+				if (binding == null || Bindings.isVoidType(binding)) {
+					return false;
+				}
+				if (proposals == null) {
+					return true;
+				}
+
+				final ICompilationUnit cu= context.getCompilationUnit();
+
+				ExtractTempRefactoring extractTempRefactoringSelectedOnly= new ExtractTempRefactoring(context.getASTRoot(), expression.getStartPosition(), expression.getLength());
+				extractTempRefactoringSelectedOnly.setReplaceAllOccurrences(false);
+				if (extractTempRefactoringSelectedOnly.checkInitialConditions(new NullProgressMonitor()).isOK()) {
+					LinkedProposalModelCore linkedProposalModel= createProposalModel();
+					extractTempRefactoringSelectedOnly.setLinkedProposalModel(linkedProposalModel);
+					extractTempRefactoringSelectedOnly.setCheckResultForCompileProblems(false);
+
+					String label= CorrectionMessages.QuickAssistProcessor_extract_anonymous_to_local_description;
+					String preview= CorrectionMessages.QuickAssistProcessor_extract_anonymous_to_local_preview;
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+					int relevance;
+					if (context.getSelectionLength() == 0) {
+						relevance= IProposalRelevance.EXTRACT_LOCAL_ZERO_SELECTION;
+					} else {
+						relevance= IProposalRelevance.EXTRACT_LOCAL;
+					}
+					ExtractTempRefactoringProposalCore core= new ExtractTempRefactoringProposalCore(label, cu, extractTempRefactoringSelectedOnly, relevance, preview);
+					RefactoringCorrectionProposal proposal= new RefactoringCorrectionProposalExtension(label, cu, relevance, image, core);
+
+					proposal.setCommandId(EXTRACT_LOCAL_NOT_REPLACE_ID);
+					proposal.setLinkedProposalModel(linkedProposalModel);
+					proposals.add(proposal);
+				}
+			}
+		}
+		return false;
+	}
+
 	private static class ExtractTempRefactoringProposalCore extends RefactoringCorrectionProposalCore {
 		private final String fPreview;
 
@@ -760,7 +806,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_LAMBDA, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUpCore(options), IProposalRelevance.CONVERT_TO_LAMBDA_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -787,7 +833,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new LambdaExpressionsCleanUpCore(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -858,7 +904,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new Hashtable<>();
 		options.put(CleanUpConstants.CONTROL_STATEMENTS_CONVERT_TO_SWITCH_EXPRESSIONS, CleanUpOptions.TRUE);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new SwitchExpressionsCleanUp(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new SwitchExpressionsCleanUpCore(options), IProposalRelevance.CONVERT_TO_SWITCH_EXPRESSION, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
@@ -910,7 +956,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (coveringNode instanceof LambdaExpression) {
 			enclosingLambda= (LambdaExpression) coveringNode;
 		} else if (coveringNode.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY
-				&& ((VariableDeclarationFragment) coveringNode.getParent()).getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
+				&& coveringNode.getParent().getLocationInParent() == LambdaExpression.PARAMETERS_PROPERTY) {
 			enclosingLambda= (LambdaExpression) coveringNode.getParent().getParent();
 		} else {
 			return false;
@@ -2897,14 +2943,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (resultingCollections == null)
 			return true;
 
-		IProposableFix fix= UnnecessaryArrayCreationFix.createUnnecessaryArrayCreationFix(context.getASTRoot(), methodInvocation);
+		IProposableFix fix= UnnecessaryArrayCreationFixCore.createUnnecessaryArrayCreationFix(context.getASTRoot(), methodInvocation);
 		if (fix == null)
 			return false;
 
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.REMOVE_UNNECESSARY_ARRAY_CREATION, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new UnnecessaryArrayCreationCleanUp(options);
+		ICleanUp cleanUp= new UnnecessaryArrayCreationCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.REMOVE_UNNECESSARY_ARRAY_CREATION, image, context);
 		proposal.setCommandId(REMOVE_UNNECESSARY_ARRAY_CREATION_ID);
 
@@ -2932,7 +2978,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.DO_WHILE_RATHER_THAN_WHILE, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new DoWhileRatherThanWhileCleanUp(options);
+		ICleanUp cleanUp= new DoWhileRatherThanWhileCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.DO_WHILE_RATHER_THAN_WHILE, image, context);
 		resultingCollections.add(proposal);
 		return true;
@@ -2975,7 +3021,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		Map<String, String> options= new HashMap<>();
 		options.put(CleanUpConstants.STRINGCONCAT_TO_TEXTBLOCK, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.STRINGCONCAT_STRINGBUFFER_STRINGBUILDER, CleanUpOptions.TRUE);
-		ICleanUp cleanUp= new StringConcatToTextBlockCleanUp(options);
+		ICleanUp cleanUp= new StringConcatToTextBlockCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.CONVERT_TO_TEXT_BLOCK, image, context);
 		resultingCollections.add(proposal);
 		return true;
@@ -3125,7 +3171,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_LOCAL_VARIABLES, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PARAMETERS, CleanUpOptions.TRUE);
 		options.put(CleanUpConstants.VARIABLE_DECLARATIONS_USE_FINAL_PRIVATE_FIELDS, CleanUpOptions.TRUE);
-		VariableDeclarationCleanUp cleanUp= new VariableDeclarationCleanUp(options);
+		VariableDeclarationCleanUpCore cleanUp= new VariableDeclarationCleanUpCore(options);
 		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, IProposalRelevance.MAKE_VARIABLE_DECLARATION_FINAL, image, context);
 		resultingCollections.add(proposal);
 		return true;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2019 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -166,14 +166,14 @@ public final class MemberVisibilityAdjustor {
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(root);
 			final int visibility= fKeyword != null ? fKeyword.toFlagValue() : Modifier.NONE;
-			if (fMember instanceof IField && !Flags.isEnum(fMember.getFlags())) {
+			if (fMember instanceof IField && !Flags.isEnum(fMember.getFlags()) && !Flags.isRecord(fMember.getFlags())) {
 				final VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode((IField) fMember, root);
 				final FieldDeclaration declaration= (FieldDeclaration) fragment.getParent();
 				VariableDeclarationFragment[] fragmentsToChange= new VariableDeclarationFragment[] { fragment };
 				VariableDeclarationRewrite.rewriteModifiers(declaration, fragmentsToChange, visibility, ModifierRewrite.VISIBILITY_MODIFIERS, rewrite, group);
 				if (status != null)
 					adjustor.fStatus.merge(status);
-			} else if (fMember != null) {
+			} else if (fMember != null && !Flags.isRecord(fMember.getFlags())) {
 				final BodyDeclaration declaration= ASTNodeSearchUtil.getBodyDeclarationNode(fMember, root);
 				if (declaration != null) {
 					ModifierRewrite.create(rewrite, declaration).setVisibility(visibility, group);
@@ -508,7 +508,7 @@ public final class MemberVisibilityAdjustor {
 
 		if (member instanceof IType) {
 			// recursively check accessibility of member type's members
-			final IJavaElement[] typeMembers= ((IType) member).getChildren();
+			final IJavaElement[] typeMembers= member.getChildren();
 			for (IJavaElement typeMember : typeMembers) {
 				if (! (typeMember instanceof IInitializer))
 					adjustMemberVisibility((IMember) typeMember, monitor);
@@ -1272,7 +1272,15 @@ public final class MemberVisibilityAdjustor {
 		}
 		final ICompilationUnit typeUnit= referencing.getCompilationUnit();
 		if (referencedUnit != null && referencedUnit.equals(typeUnit)) {
-			if (referenced.getDeclaringType().getDeclaringType() != null)
+			IType referencedType= referenced.getDeclaringType();
+			while (referencedType.getDeclaringType() != null) {
+				referencedType= referencedType.getDeclaringType();
+			}
+			IType referencingType= referencing;
+			while (referencingType.getDeclaringType() != null) {
+				referencingType= referencingType.getDeclaringType();
+			}
+			if (!referencedType.getFullyQualifiedName().equals(referencingType.getFullyQualifiedName()))
 				keyword= null;
 			else
 				keyword= ModifierKeyword.PRIVATE_KEYWORD;

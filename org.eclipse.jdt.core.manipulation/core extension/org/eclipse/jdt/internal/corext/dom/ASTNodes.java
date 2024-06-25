@@ -560,7 +560,7 @@ public class ASTNodes {
 		if (declaration instanceof SingleVariableDeclaration) {
 			return ((SingleVariableDeclaration)declaration).getType();
 		} else if (declaration instanceof VariableDeclarationFragment) {
-			ASTNode parent= ((VariableDeclarationFragment)declaration).getParent();
+			ASTNode parent= declaration.getParent();
 			if (parent instanceof VariableDeclarationExpression)
 				return ((VariableDeclarationExpression)parent).getType();
 			else if (parent instanceof VariableDeclarationStatement)
@@ -2521,6 +2521,27 @@ public class ASTNodes {
 	}
 
 	/**
+	 * Returns the top-level AbstractTypeDeclaration that is the parent of the node.
+	 *
+	 * @param node the node
+	 * @return the top-level AbstractTypeDeclaration node for the file that node is in
+	 */
+	public static AbstractTypeDeclaration getTopLevelTypeDeclaration(ASTNode node) {
+		AbstractTypeDeclaration result= null;
+		if (node instanceof AbstractTypeDeclaration) {
+			result= (AbstractTypeDeclaration) node;
+		}
+		ASTNode parent= node.getParent();
+		while (parent != null) {
+			if (parent instanceof AbstractTypeDeclaration) {
+				result= (AbstractTypeDeclaration) parent;
+			}
+			parent= parent.getParent();
+		}
+		return result;
+	}
+
+	/**
 	 * Returns the closest ancestor of <code>node</code> whose type is <code>nodeType</code>, or <code>null</code> if none.
 	 * <p>
 	 * <b>Warning:</b> This method does not stop at any boundaries like parentheses, statements, body declarations, etc.
@@ -4125,6 +4146,25 @@ public class ASTNodes {
 				getDeclarationsInScope(node.getStartPosition(), ScopeAnalyzer.VARIABLES | ScopeAnalyzer.NO_FIELDS | ScopeAnalyzer.CHECK_VISIBILITY);
 		for (IBinding binding : bindings) {
 			variableNames.add(binding.getName());
+		}
+		return variableNames;
+	}
+
+	/**
+	 * Returns a list of all variable names used in the block containing the given node.
+	 *
+	 * @param node the AST node
+	 * @return a list of local variable names in the block of the given node
+	 * @see ScopeAnalyzer#getUsedVariableNames(int, int)
+	 */
+	public static List<String> getAllLocalVariablesInBlock(ASTNode node) {
+		List<String> variableNames= new ArrayList<>();
+		CompilationUnit root= (CompilationUnit) node.getRoot();
+		Block block= ASTNodes.getFirstAncestorOrNull(node, Block.class);
+		if (block != null) {
+			Collection<String> names= new ScopeAnalyzer(root).
+					getUsedVariableNames(block.getStartPosition(), block.getLength());
+			variableNames.addAll(names);
 		}
 		return variableNames;
 	}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2022 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -22,30 +22,30 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 
 import org.eclipse.jdt.internal.ui.fix.AbstractCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ArrayWithCurlyCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.ArraysFillCleanUp;
-import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUp;
+import org.eclipse.jdt.internal.ui.fix.BooleanValueRatherThanComparisonCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.CollectionCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.DoubleNegationCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EmbeddedIfCleanUp;
 import org.eclipse.jdt.internal.ui.fix.EvaluateNullableCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapCloningCleanUp;
 import org.eclipse.jdt.internal.ui.fix.MapMethodCleanUp;
-import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUp;
+import org.eclipse.jdt.internal.ui.fix.OverriddenAssignmentCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.PushDownNegationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUp;
+import org.eclipse.jdt.internal.ui.fix.RedundantComparatorCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.RedundantComparisonStatementCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantModifiersCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSemicolonsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.RedundantSuperCallCleanUp;
-import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ReturnExpressionCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
-import org.eclipse.jdt.internal.ui.fix.SubstringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.SubstringCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnloopedWhileCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryArrayCreationCleanUpCore;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UnreachableBlockCleanUp;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUpCore;
 import org.eclipse.jdt.internal.ui.fix.UselessContinueCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UselessReturnCleanUp;
 
@@ -55,14 +55,14 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 	@Override
 	protected AbstractCleanUp[] createPreviewCleanUps(Map<String, String> values) {
 		return new AbstractCleanUp[] {
-				new UnusedCodeCleanUp(values),
-				new UnnecessaryCodeCleanUp(values),
-				new SubstringCleanUp(values),
+				new UnusedCodeCleanUpCore(values),
+				new UnnecessaryCodeCleanUpCore(values),
+				new SubstringCleanUpCore(values),
 				new StringCleanUp(values),
 				new ArraysFillCleanUp(values),
 				new EvaluateNullableCleanUp(values),
 				new PushDownNegationCleanUp(values),
-				new BooleanValueRatherThanComparisonCleanUp(values),
+				new BooleanValueRatherThanComparisonCleanUpCore(values),
 				new DoubleNegationCleanUp(values),
 				new RedundantComparisonStatementCleanUp(values),
 				new RedundantSuperCallCleanUp(values),
@@ -70,14 +70,14 @@ public final class UnnecessaryCodeTabPage extends AbstractCleanUpTabPage {
 				new MapMethodCleanUp(values),
 				new CollectionCloningCleanUp(values),
 				new MapCloningCleanUp(values),
-				new OverriddenAssignmentCleanUp(values),
+				new OverriddenAssignmentCleanUpCore(values),
 				new RedundantModifiersCleanUp(values),
 				new EmbeddedIfCleanUp(values),
 				new RedundantSemicolonsCleanUp(values),
-				new RedundantComparatorCleanUp(values),
-				new UnnecessaryArrayCreationCleanUp(values),
-				new ArrayWithCurlyCleanUp(values),
-				new ReturnExpressionCleanUp(values),
+				new RedundantComparatorCleanUpCore(values),
+				new UnnecessaryArrayCreationCleanUpCore(values),
+				new ArrayWithCurlyCleanUpCore(values),
+				new ReturnExpressionCleanUpCore(values),
 				new UselessReturnCleanUp(values),
 				new UselessContinueCleanUp(values),
 				new UnloopedWhileCleanUp(values)

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2021 IBM Corporation and others.
+ * Copyright (c) 2000, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -691,9 +691,12 @@ public class MoveMembersTests extends GenericRefactoringTest {
 				RefactoringStatus.FATAL, "p.B");
 	}
 
+	// Issue 1299
 	@Test
 	public void testFail22() throws Exception{
-		//free slot
+		fieldMethodTypeHelper_failing(new String[0],
+				new String[]{"m"}, new String[][]{new String[0]}, new String[0],
+				RefactoringStatus.FATAL, "p.B");
 	}
 
 	@Test
