@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -474,8 +475,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 			fInstalledJVMs= getWorkspaceJREs();
 			Arrays.sort(fInstalledJVMs, (i0, i1) -> {
 				if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
-					String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.getFirstJavaSourceVersionSupportedByCompiler());
-					String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.getFirstJavaSourceVersionSupportedByCompiler());
+					String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first());
+					String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first());
 					int result= JavaCore.compareJavaVersions(cc1, cc0);
 					if (result != 0)
 						return result;
@@ -483,8 +484,9 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 				return Policy.getComparator().compare(i0.getName(), i1.getName());
 			});
 
-			List<IExecutionEnvironment> environments= JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments();
-			fInstalledEEs= environments.toArray(IExecutionEnvironment[]::new);
+			IExecutionEnvironment[] environments= JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments().toArray(IExecutionEnvironment[]::new);
+			Collections.reverse(Arrays.asList(environments));
+			fInstalledEEs= environments;
 		}
 
 		public Control createControl(Composite composite) {
@@ -605,7 +607,8 @@ public class NewJavaProjectWizardPageOne extends WizardPage {
 		private String getDefaultEEName() {
 			IVMInstall defaultVM= JavaRuntime.getDefaultVMInstall();
 
-			List<IExecutionEnvironment> environments= JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments();
+			List<IExecutionEnvironment> environments= new ArrayList<>(JavaRuntime.getExecutionEnvironmentsManager().getSupportedExecutionEnvironments());
+			Collections.reverse(environments);
 			if (defaultVM != null) {
 				for (IExecutionEnvironment environment : environments) {
 					IVMInstall eeDefaultVM= environment.getDefaultVM();

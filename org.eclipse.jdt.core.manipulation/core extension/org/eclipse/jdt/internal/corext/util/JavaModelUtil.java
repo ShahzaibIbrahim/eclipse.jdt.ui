@@ -770,8 +770,10 @@ public final class JavaModelUtil {
 		JavaCore.setComplianceOptions(compliance, map);
 	}
 
+	/**
+	 * @param compliance currently unused
+	 */
 	public static void setDefaultClassfileOptions(Map<String, String> map, String compliance) {
-		map.put(JavaCore.COMPILER_CODEGEN_INLINE_JSR_BYTECODE, is50OrHigher(compliance) ? JavaCore.ENABLED : JavaCore.DISABLED);
 		map.put(JavaCore.COMPILER_LOCAL_VARIABLE_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_LINE_NUMBER_ATTR, JavaCore.GENERATE);
 		map.put(JavaCore.COMPILER_SOURCE_FILE_ATTR, JavaCore.GENERATE);
@@ -1155,7 +1157,7 @@ public final class JavaModelUtil {
 				if(JavaCore.isJavaSourceVersionSupportedByCompiler(compliance)) {
 					return compliance;
 				}
-				return JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+				return JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
 			}
 		}
 
@@ -1192,7 +1194,7 @@ public final class JavaModelUtil {
 		} else if (desc.indexOf(JavaCore.VERSION_1_8) != -1) {
 			return JavaCore.VERSION_1_8;
 		}
-		return JavaCore.getFirstJavaSourceVersionSupportedByCompiler();
+		return JavaCore.getAllJavaSourceVersionsSupportedByCompiler().first();
 	}
 
 	/**

@@ -581,6 +581,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String ExtractMethodAnalyzer_leftHandSideOfAssignment;
 
+	public static String ExtractMethodAnalyzer_method_will_override_call_in_subclass;
+
 	public static String ExtractMethodAnalyzer_no_valid_destination_type;
 
 	public static String ExtractMethodAnalyzer_invalid_selection;
@@ -1571,6 +1573,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String PullUpRefactoring_final_fields;
 
+	public static String PullUpRefactoring_inaccessible_outer_fields;
+
 	public static String PullUpRefactoring_incompatible_langauge_constructs;
 
 	public static String PullUpRefactoring_incompatible_language_constructs1;
@@ -2494,6 +2498,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String UseSupertypeWherePossibleRefactoring_name;
 
 	public static String ChangeSignatureRefactoring_lambda_expression;
+
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
