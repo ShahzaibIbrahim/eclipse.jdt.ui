@@ -66,7 +66,7 @@ import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -108,23 +108,34 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.JOIN)) {
-			return "" //$NON-NLS-1$
-					+ "String concatenation= String.join(\", \", texts);\n" //$NON-NLS-1$
-					+ "return concatenation;\n\n\n\n\n\n\n\n\n\n"; //$NON-NLS-1$
+			return """
+				String concatenation= String.join(", ", texts);
+				return concatenation;
+				
+				
+				
+				
+				
+				
+				
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean isFirst = true;\n" //$NON-NLS-1$
-				+ "StringBuilder concatenation = new StringBuilder();\n" //$NON-NLS-1$
-				+ "for (String text : texts) {\n" //$NON-NLS-1$
-				+ "  if (isFirst) {\n" //$NON-NLS-1$
-				+ "    isFirst = false;\n" //$NON-NLS-1$
-				+ "  } else {\n" //$NON-NLS-1$
-				+ "    concatenation.append(\", \");\n" //$NON-NLS-1$
-				+ "  }\n" //$NON-NLS-1$
-				+ "  concatenation.append(text);\n" //$NON-NLS-1$
-				+ "}\n" //$NON-NLS-1$
-				+ "return concatenation.toString();\n"; //$NON-NLS-1$
+		return """
+			boolean isFirst = true;
+			StringBuilder concatenation = new StringBuilder();
+			for (String text : texts) {
+			  if (isFirst) {
+			    isFirst = false;
+			  } else {
+			    concatenation.append(", ");
+			  }
+			  concatenation.append(text);
+			}
+			return concatenation.toString();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -133,7 +144,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -684,7 +695,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.JoinCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -702,7 +713,7 @@ public class JoinCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		return null;
 	}
 
-	private static class JoinOperation extends CompilationUnitRewriteOperation {
+	private static class JoinOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Statement node;
 		private Expression containerVariable;
 		private final Statement booleanStatement;

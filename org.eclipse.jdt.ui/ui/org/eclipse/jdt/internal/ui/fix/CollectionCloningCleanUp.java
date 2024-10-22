@@ -59,7 +59,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -100,9 +100,10 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 			return "List<Integer> output = new ArrayList<>(collection);\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "List<Integer> output = new ArrayList<>();\n" //$NON-NLS-1$
-				+ "output.addAll(collection);\n"; //$NON-NLS-1$
+		return """
+			List<Integer> output = new ArrayList<>();
+			output.addAll(collection);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -236,7 +237,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CollectionCloningCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -249,7 +250,7 @@ public class CollectionCloningCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class CollectionCloningOperation extends CompilationUnitRewriteOperation {
+	private static class CollectionCloningOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final ExpressionStatement nodeToRemove;
 		private final ClassInstanceCreation classInstanceCreation;
 		private final Expression arg0;

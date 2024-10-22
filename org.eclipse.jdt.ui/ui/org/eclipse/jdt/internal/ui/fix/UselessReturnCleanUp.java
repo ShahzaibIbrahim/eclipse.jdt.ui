@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2020 Fabrice TIERCELIN and others.
+ * Copyright (c) 2020, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -98,7 +98,7 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -149,6 +149,16 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 							return false;
 						}
 
+						if (parent instanceof IfStatement ifStatement && ifStatement.getElseStatement() != null
+								&& node.getLocationInParent() != IfStatement.ELSE_STATEMENT_PROPERTY) {
+							if (isEnabled(CleanUpConstants.REDUCE_INDENTATION)) {
+								Statement elseStatement= ifStatement.getElseStatement();
+								if (elseStatement != null) {
+									return false;
+								}
+							}
+						}
+
 						if (parent instanceof Statement) {
 							return isLastStatement((Statement) parent);
 						}
@@ -164,7 +174,7 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.UselessReturnCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -177,7 +187,7 @@ public class UselessReturnCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class UselessReturnOperation extends CompilationUnitRewriteOperation {
+	private static class UselessReturnOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final ReturnStatement node;
 		private final Block block;
 

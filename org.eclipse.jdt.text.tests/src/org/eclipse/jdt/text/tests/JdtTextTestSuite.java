@@ -14,8 +14,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.text.tests.codemining.CodeMiningTriggerTest;
 import org.eclipse.jdt.text.tests.codemining.ParameterNamesCodeMiningTest;
@@ -29,8 +29,8 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
  *
  * @since 3.0
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	PluginsNotLoadedTest.class,
 	CompilationUnitDocumentProviderTest.class,
 	JavaHeuristicScannerTest.class,
@@ -53,6 +53,7 @@ import org.eclipse.jdt.text.tests.templates.TemplatesTestSuite;
 	SpellCheckEngineTestCase.class,
 	SemanticHighlightingTest.class,
 	AutoboxingSemanticHighlightingTest.class,
+	Java23SemanticHighlightingTest.class,
 	NewForLoopJavaContextTest.class,
 	IteratorForLoopJavaContextTest.class,
 	ArrayWithTempVarForLoopJavaContextTest.class,

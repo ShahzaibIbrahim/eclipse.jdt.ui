@@ -48,7 +48,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 
 	private final static class ControlStatementFinder extends GenericVisitor {
 
-		private final List<CompilationUnitRewriteOperation> fResult;
+		private final List<CompilationUnitRewriteOperationWithSourceRange> fResult;
 		private final boolean fFindControlStatementsWithoutBlock;
 		private final boolean fRemoveUnnecessaryBlocks;
 		private final boolean fRemoveUnnecessaryBlocksOnlyWhenReturnOrThrow;
@@ -56,7 +56,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		public ControlStatementFinder(boolean findControlStatementsWithoutBlock,
 				boolean removeUnnecessaryBlocks,
 				boolean removeUnnecessaryBlocksOnlyWhenReturnOrThrow,
-				List<CompilationUnitRewriteOperation> resultingCollection) {
+				List<CompilationUnitRewriteOperationWithSourceRange> resultingCollection) {
 
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
@@ -169,7 +169,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
         }
 	}
 
-	private static final class AddBlockOperation extends CompilationUnitRewriteOperation {
+	private static final class AddBlockOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private final ChildPropertyDescriptor fBodyProperty;
 		private final Statement fBody;
@@ -266,7 +266,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 
 	}
 
-	static class RemoveBlockOperation extends CompilationUnitRewriteOperation {
+	static class RemoveBlockOperation extends CompilationUnitRewriteOperationWithSourceRange {
 
 		private final Statement fStatement;
 		private final ChildPropertyDescriptor fChild;
@@ -437,7 +437,7 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
             		RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.THEN_STATEMENT_PROPERTY);
 					removeAllList.add(op);
 					if (item == statement)
-						result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op}));
+						result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op}));
             	}
 			}
 
@@ -445,11 +445,11 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
             	RemoveBlockOperation op= new RemoveBlockOperation(item, IfStatement.ELSE_STATEMENT_PROPERTY);
 				removeAllList.add(op);
 				if (item == statement)
-					result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op}));
+					result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op}));
             }
 
 			if (removeAllList.size() > 1) {
-				CompilationUnitRewriteOperation[] allConvert= removeAllList.toArray(new CompilationUnitRewriteOperation[removeAllList.size()]);
+				CompilationUnitRewriteOperationWithSourceRange[] allConvert= removeAllList.toArray(new CompilationUnitRewriteOperationWithSourceRange[removeAllList.size()]);
 				result.add(new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, allConvert));
             }
 
@@ -457,22 +457,22 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		} else if (statement instanceof WhileStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, WhileStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY);
-				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op})};
 			}
 		} else if (statement instanceof ForStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, ForStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, ForStatement.BODY_PROPERTY);
-				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op})};
 			}
 		} else if (statement instanceof EnhancedForStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, EnhancedForStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, EnhancedForStatement.BODY_PROPERTY);
-				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op})};
 			}
 		} else if (statement instanceof DoStatement) {
 			if (RemoveBlockOperation.satisfiesQuickAssistPrecondition(statement, DoStatement.BODY_PROPERTY)) {
 				RemoveBlockOperation op= new RemoveBlockOperation(statement, DoStatement.BODY_PROPERTY);
-				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperation[] {op})};
+				return new ControlStatementsFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new CompilationUnitRewriteOperationWithSourceRange[] {op})};
 			}
 		}
 
@@ -487,18 +487,18 @@ public class ControlStatementsFix extends CompilationUnitRewriteOperationsFix {
 		if (!convertSingleStatementToBlock && !removeUnnecessaryBlock && !removeUnnecessaryBlockContainingReturnOrThrow)
 			return null;
 
-		List<CompilationUnitRewriteOperation> operations= new ArrayList<>();
+		List<CompilationUnitRewriteOperationWithSourceRange> operations= new ArrayList<>();
 		ControlStatementFinder finder= new ControlStatementFinder(convertSingleStatementToBlock, removeUnnecessaryBlock, removeUnnecessaryBlockContainingReturnOrThrow, operations);
 		compilationUnit.accept(finder);
 
 		if (operations.isEmpty())
 			return null;
 
-		CompilationUnitRewriteOperation[] ops= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
+		CompilationUnitRewriteOperationWithSourceRange[] ops= operations.toArray(new CompilationUnitRewriteOperationWithSourceRange[operations.size()]);
 		return new ControlStatementsFix(FixMessages.ControlStatementsFix_change_name, compilationUnit, ops);
 	}
 
-	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] fixRewriteOperations) {
+	protected ControlStatementsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperationWithSourceRange[] fixRewriteOperations) {
 		super(name, compilationUnit, fixRewriteOperations);
 	}
 

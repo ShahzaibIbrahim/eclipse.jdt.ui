@@ -37,7 +37,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -82,14 +82,16 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PRIMITIVE_PARSING)) {
-			return "" //$NON-NLS-1$
-					+ "int number = Integer.parseInt(\"42\", 8);\n" //$NON-NLS-1$
-					+ "Double.parseDouble(\"42.42\");\n"; //$NON-NLS-1$
+			return """
+				int number = Integer.parseInt("42", 8);
+				Double.parseDouble("42.42");
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "int number = Integer.valueOf(\"42\", 8);\n" //$NON-NLS-1$
-				+ "new Double(\"42.42\").doubleValue();\n"; //$NON-NLS-1$
+		return """
+			int number = Integer.valueOf("42", 8);
+			new Double("42.42").doubleValue();
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -98,7 +100,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -208,7 +210,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.PrimitiveParsingCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -221,7 +223,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class PrimitiveParsingWithTheSingleArgumentOperation extends CompilationUnitRewriteOperation {
+	private static class PrimitiveParsingWithTheSingleArgumentOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final MethodInvocation visited;
 
 		public PrimitiveParsingWithTheSingleArgumentOperation(final MethodInvocation visited) {
@@ -237,7 +239,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 		}
 	}
 
-	private static class PrimitiveParsingMethodNameOperation extends CompilationUnitRewriteOperation {
+	private static class PrimitiveParsingMethodNameOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final MethodInvocation visited;
 		private final String methodName;
 
@@ -256,7 +258,7 @@ public class PrimitiveParsingCleanUp extends AbstractMultiFix {
 		}
 	}
 
-	private static class PrimitiveParsingReplaceByParsingOperation extends CompilationUnitRewriteOperation {
+	private static class PrimitiveParsingReplaceByParsingOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final MethodInvocation visited;
 		private final ITypeBinding typeBinding;
 		private final String methodName;

@@ -960,6 +960,77 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 	}
 
 	@Test
+	public void testConvertToLambdaAmbiguous04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		String sample= """
+			package test;
+			public interface E {
+			    default void m() {
+			        bar(0, new FI() {
+			            @Override
+			            public int foo(int x) {
+			                return x++;
+			            }
+			        }, 3);
+			        baz(0, new ZI() {
+			            @Override
+			            public int zoo() {
+			                return 1;
+			            }
+			        });
+			    }
+
+			    void bar(int i, FI fi, int j);
+			    void bar(int i, FV fv);
+
+			    void baz(int i, ZI zi);
+			    void baz(int i, ZV zv);
+			}
+
+			@FunctionalInterface interface FI { int  foo(int a); }
+			@FunctionalInterface interface FV { void foo(int a); }
+
+			@FunctionalInterface interface ZI { int  zoo(); }
+			@FunctionalInterface interface ZV { void zoo(); }
+			""";
+		String original= sample;
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		sample= """
+			package test;
+			public interface E {
+			    default void m() {
+			        bar(0, x -> x++, 3);
+			        baz(0, () -> 1);
+			    }
+
+			    void bar(int i, FI fi, int j);
+			    void bar(int i, FV fv);
+
+			    void baz(int i, ZI zi);
+			    void baz(int i, ZV zv);
+			}
+
+			@FunctionalInterface interface FI { int  foo(int a); }
+			@FunctionalInterface interface FV { void foo(int a); }
+
+			@FunctionalInterface interface ZI { int  zoo(); }
+			@FunctionalInterface interface ZV { void zoo(); }
+			""";
+		String expected1= sample;
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
+
+		disable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.USE_ANONYMOUS_CLASS_CREATION);
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { original }, null);
+	}
+
+	@Test
 	public void testConvertToLambdaConflictingNames() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		String sample= """
@@ -1845,7 +1916,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -1896,7 +1967,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -2025,7 +2096,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -2084,7 +2155,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -2140,7 +2211,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -2196,7 +2267,63 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
+				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
+	}
+
+	@Test
+	public void testIssue1047_5() throws Exception {
+		// Given
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		String given1= """
+			import java.util.function.Supplier;
+
+			public class E1 {
+
+			    static void func( String ... args) {
+
+			    }
+			    void called( Supplier<Object> r ) {
+
+			    }
+			}
+			"""; //
+		ICompilationUnit cu1= pack.createCompilationUnit("E1.java", given1, false, null);
+
+		String given= """
+			import java.util.function.Supplier;
+
+			public class E extends E1 {
+
+			    void called( Runnable r, int i ) {
+
+			    }
+			    void test() {
+			        called(() -> E1.func(), 3);
+			    }
+			}
+			"""; //
+
+		String expected= """
+			import java.util.function.Supplier;
+
+			public class E extends E1 {
+
+			    void called( Runnable r, int i ) {
+
+			    }
+			    void test() {
+			        called(E1::func, 3);
+			    }
+			}
+			"""; //
+		// When
+		ICompilationUnit cu= pack.createCompilationUnit("E.java", given, false, null);
+		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
+
+		// Then
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu, cu1 }, new String[] { expected, given1 },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -2272,7 +2399,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.SIMPLIFY_LAMBDA_EXPRESSION_AND_METHOD_REF);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.LambdaExpressionAndMethodRefCleanUp_description)));
 	}
@@ -3071,7 +3198,7 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		enable(CleanUpConstants.COMPARING_ON_CRITERIA);
 
 		// Then
-		assertNotEquals("The class must be changed", given, expected);
+		assertNotEquals("The class must be changed", expected, given);
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu }, new String[] { expected },
 				new HashSet<>(Arrays.asList(MultiFixMessages.ComparingOnCriteriaCleanUp_description)));
 	}
@@ -6798,4 +6925,132 @@ public class CleanUpTest1d8 extends CleanUpTestCase {
 		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected1 }, null);
     }
 
+	@Test
+	public void testConvertToLambdaIssue1535_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, new Iterable<String>() {
+							@Override
+							public Iterator<String> iterator() {
+                				return rankedListIterator;
+							}
+						});
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+
+		String expected= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, (Iterable<String>) () -> rankedListIterator);
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+
+	}
+
+	@Test
+	public void testConvertToLambdaIssue1535_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		String original= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+
+					private Iterator<String> myfunc() {
+						class K implements Iterator<String> {
+							@Override
+							public boolean hasNext() {
+								return false;
+							}
+
+							@Override
+							public String next() {
+								return null;
+							}
+						}
+						return new K();
+					}
+
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, new Iterable<String>() {
+							@Override
+							public Iterator<String> iterator() {
+                				return myfunc();
+							}
+						});
+					}
+				}
+				""";
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", original, false, null);
+
+		enable(CleanUpConstants.CONVERT_FUNCTIONAL_INTERFACES);
+		enable(CleanUpConstants.USE_LAMBDA);
+		enable(CleanUpConstants.ALSO_SIMPLIFY_LAMBDA);
+
+		String expected= """
+				package test1;
+
+				import java.util.Iterator;
+				import java.util.List;
+
+				public class E {
+					private void func(Iterable<?> a, Iterable<?> b) {}
+
+					private Iterator<String> myfunc() {
+						class K implements Iterator<String> {
+							@Override
+							public boolean hasNext() {
+								return false;
+							}
+
+							@Override
+							public String next() {
+								return null;
+							}
+						}
+						return new K();
+					}
+
+					private void assertIteratorProducesExpectedList(
+						List<String> expectedList,
+						Iterator<String> rankedListIterator) {
+						func(expectedList, (Iterable<String>) this::myfunc);
+					}
+				}
+				""";
+
+		assertRefactoringResultAsExpected(new ICompilationUnit[] { cu1 }, new String[] { expected }, null);
+
+	}
 }

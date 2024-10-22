@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -89,20 +89,26 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_OBJECTS_EQUALS)) {
-			return "" //$NON-NLS-1$
-					+ "if (!Objects.equals(aText, other.aText)) {\n" //$NON-NLS-1$
-					+ "	return false;\n" //$NON-NLS-1$
-					+ "}\n\n\n\n\n"; //$NON-NLS-1$
+			return """
+				if (!Objects.equals(aText, other.aText)) {
+					return false;
+				}
+				
+				
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (aText == null) {\n" //$NON-NLS-1$
-				+ "  if (other.aText != null) {\n" //$NON-NLS-1$
-				+ "    return false;\n" //$NON-NLS-1$
-				+ "  }\n" //$NON-NLS-1$
-				+ "} else if (!aText.equals(other.aText)) {\n" //$NON-NLS-1$
-				+ "	return false;\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (aText == null) {
+			  if (other.aText != null) {
+			    return false;
+			  }
+			} else if (!aText.equals(other.aText)) {
+				return false;
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -111,7 +117,7 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 
@@ -210,7 +216,7 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.ObjectsEqualsCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -228,7 +234,7 @@ public class ObjectsEqualsCleanUp extends AbstractMultiFix implements ICleanUpFi
 		return null;
 	}
 
-	private static class ObjectsEqualsOperation extends CompilationUnitRewriteOperation {
+	private static class ObjectsEqualsOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement node;
 		private final Expression firstField;
 		private final Expression secondField;

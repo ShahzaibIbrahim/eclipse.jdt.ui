@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2021, 2022 Fabrice TIERCELIN and others.
+ * Copyright (c) 2021, 2024 Fabrice TIERCELIN and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -44,13 +44,15 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.cleanup.CleanUpRequirements;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
+import org.eclipse.jdt.internal.ui.fix.SimplifyBooleanIfElseCleanUpCore.SimplifyStatus;
 
 /**
  * A fix that removes useless indentation when the opposite workflow falls through:
@@ -185,7 +187,7 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -195,6 +197,12 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 				if (!(visited.getElseStatement() instanceof Block)
 						&& !ASTNodes.canHaveSiblings(visited)) {
 					return true;
+				}
+
+				if (isEnabled(CleanUpConstants.SIMPLIFY_BOOLEAN_IF_ELSE)) {
+					if (SimplifyBooleanIfElseCleanUpCore.verifyBooleanIfElse(visited) != SimplifyStatus.INVALID) {
+						return true;
+					}
 				}
 
 				if (visited.getElseStatement() != null && !ASTNodes.isInElse(visited)) {
@@ -239,7 +247,7 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CodeStyleCleanUp_ReduceIndentation_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -252,7 +260,7 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class ReduceIndentationThenOperation extends CompilationUnitRewriteOperation {
+	private static class ReduceIndentationThenOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement visited;
 
 		public ReduceIndentationThenOperation(final IfStatement visited) {
@@ -293,7 +301,7 @@ public class ReduceIndentationCleanUp extends AbstractMultiFix {
 		}
 	}
 
-	private static class ReduceIndentationElseOperation extends CompilationUnitRewriteOperation {
+	private static class ReduceIndentationElseOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement visited;
 
 		public ReduceIndentationElseOperation(final IfStatement visited) {

@@ -14,16 +14,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.text.tests.contentassist;
 
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 /**
  * Content assist test suite.
  *
  * @since 3.2
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
 	//$JUnit-BEGIN$
 			CamelCaseCompletionTest.class,
 			JavadocCompletionTest.class,
@@ -39,6 +39,8 @@ import org.junit.runners.Suite;
 			SpecialMethodsCompletionTest.class,
 			CodeCompletionTest.class,
 			CodeCompletionTest1d8.class,
+			CodeCompletionTest16.class,
+			CodeCompletionTest23.class,
 			ContinuousTypingCompletionTest.class,
 			ChainCompletionTest.class,
 			PostFixCompletionTest.class

@@ -1116,7 +1116,30 @@ public class CleanUpConstants {
 	 * @since 4.20
 	 */
 	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED= "cleanup.system_property_boolean"; //$NON-NLS-1$
-
+	/**
+	 * Replace java.runtime.version given using System property to methods designed
+	 * for the purpose.  For example, replace: <p>{@code System.getProperty("java.runtime.version")}</p> by<p>
+	 * {@code Runtime.version().toString()}
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.30
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION= "cleanup.system_property_javaversion"; //$NON-NLS-1$
+	/**
+	 * Replace java.runtime.version given using System property to methods designed
+	 * for the purpose.  For example, replace: <p>{@code System.getProperty("java.specification.version")}</p> by<p>
+	 * {@code Runtime.version().feature()}
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.30
+	 */
+	public static final String CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION= "cleanup.system_property_javaspecversion"; //$NON-NLS-1$
 	/**
 	 * Replaces Boolean.TRUE/Boolean.FALSE by true/false when used as primitive.
 	 * <p>
@@ -1126,6 +1149,7 @@ public class CleanUpConstants {
 	 * @see CleanUpOptions#FALSE
 	 * @since 4.18
 	 */
+
 	public static final String PREFER_BOOLEAN_LITERAL= "cleanup.boolean_literal"; //$NON-NLS-1$
 
 	/**
@@ -1440,6 +1464,18 @@ public class CleanUpConstants {
 	 * @since 3.3
 	 */
 	public static final String REMOVE_UNNECESSARY_NLS_TAGS= "cleanup.remove_unnecessary_nls_tags"; //$NON-NLS-1$
+
+	/**
+	 * Remove unnecessary SuppressWarnings specifiers.
+	 * <br>
+	 * Possible values: {TRUE, FALSE}<br>
+	 * <br>
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.34
+	 */
+	public static final String REMOVE_UNNECESSARY_SUPPRESS_WARNINGS= "cleanup.remove_unnecessary_suppress_warnings"; //$NON-NLS-1$
 
 	/**
 	 * Insert inferred type arguments for diamonds.<br>
@@ -2087,6 +2123,17 @@ public class CleanUpConstants {
 	 * @since 4.19
 	 */
 	public static final String REDUCE_INDENTATION= "cleanup.reduce_indentation"; //$NON-NLS-1$
+
+	/**
+	 * Convert if/else that returns true or false based on condition to a single return statement if possible.
+	 * <p>
+	 * Possible values: {TRUE, FALSE}
+	 *
+	 * @see CleanUpOptions#TRUE
+	 * @see CleanUpOptions#FALSE
+	 * @since 4.35
+	 */
+	public static final String SIMPLIFY_BOOLEAN_IF_ELSE= "cleanup.simplify_boolean_if_else"; //$NON-NLS-1$
 
 	/**
 	 * Uses an {@code instanceof} expression to check an object against a hardcoded class.

@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -84,18 +84,20 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.STRICTLY_EQUAL_OR_DIFFERENT)) {
-			return "" //$NON-NLS-1$
-					+ "boolean newBoolean1 = isValid == (i > 0);\n" //$NON-NLS-1$
-					+ "boolean newBoolean2 = isValid ^ isEnabled;\n" //$NON-NLS-1$
-					+ "boolean newBoolean3 = isActive == (0 <= i);\n" //$NON-NLS-1$
-					+ "boolean newBoolean4 = isActive ^ isEnabled;\n"; //$NON-NLS-1$
+			return """
+				boolean newBoolean1 = isValid == (i > 0);
+				boolean newBoolean2 = isValid ^ isEnabled;
+				boolean newBoolean3 = isActive == (0 <= i);
+				boolean newBoolean4 = isActive ^ isEnabled;
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "boolean newBoolean1 = isValid && (i > 0) || !isValid && (i <= 0);\n" //$NON-NLS-1$
-				+ "boolean newBoolean2 = !isValid && isEnabled || isValid && !isEnabled;\n" //$NON-NLS-1$
-				+ "boolean newBoolean3 = isActive ? (0 <= i) : (i < 0);\n" //$NON-NLS-1$
-				+ "boolean newBoolean4 = !isActive ? isEnabled : !isEnabled;\n"; //$NON-NLS-1$
+		return """
+			boolean newBoolean1 = isValid && (i > 0) || !isValid && (i <= 0);
+			boolean newBoolean2 = !isValid && isEnabled || isValid && !isEnabled;
+			boolean newBoolean3 = isActive ? (0 <= i) : (i < 0);
+			boolean newBoolean4 = !isActive ? isEnabled : !isEnabled;
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -104,7 +106,7 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -190,7 +192,7 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.StrictlyEqualOrDifferentCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -208,7 +210,7 @@ public class StrictlyEqualOrDifferentCleanUp extends AbstractMultiFix implements
 		return null;
 	}
 
-	private static class StrictlyEqualOrDifferentOperation extends CompilationUnitRewriteOperation {
+	private static class StrictlyEqualOrDifferentOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Expression visited;
 		private final Expression firstExpression;
 		private final Expression secondExpression;

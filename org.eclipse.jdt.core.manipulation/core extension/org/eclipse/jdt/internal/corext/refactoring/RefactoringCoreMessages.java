@@ -49,6 +49,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CallInliner_field_initializer_simple;
 
+	public static String CallInliner_incompatible_super_call_for_static_method;
+
 	public static String CallInliner_multiDeclaration;
 
 	public static String CallInliner_receiver_type;
@@ -1453,6 +1455,8 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String MoveMembersRefactoring_only_public_static_18;
 
+	public static String MoveMembersRefactoring_override_ref;
+
 	public static String MoveMembersRefactoring_read_only;
 
 	public static String MoveMembersRefactoring_referenceUpdate;
@@ -2498,7 +2502,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String UseSupertypeWherePossibleRefactoring_name;
 
 	public static String ChangeSignatureRefactoring_lambda_expression;
-
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);

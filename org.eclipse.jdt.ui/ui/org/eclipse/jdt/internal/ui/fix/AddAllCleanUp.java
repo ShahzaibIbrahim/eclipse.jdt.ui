@@ -51,11 +51,11 @@ import org.eclipse.jdt.core.refactoring.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ForLoops;
-import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.dom.ForLoops.ForLoopContent;
+import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -99,10 +99,11 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return "outputList.addAll(inputList);\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "for (int i = 0; i < inputList.size(); i++) {\n" //$NON-NLS-1$
-				+ "    outputList.add(inputList.get(i));\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			for (int i = 0; i < inputList.size(); i++) {
+			    outputList.add(inputList.get(i));
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -111,7 +112,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -260,7 +261,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.AddAllCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -278,7 +279,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		return null;
 	}
 
-	private static class AddOrRemoveAllForArrayOperation extends CompilationUnitRewriteOperation {
+	private static class AddOrRemoveAllForArrayOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Statement toReplace;
 		private final Expression affectedCollection;
 		private final Expression addedData;
@@ -328,7 +329,7 @@ public class AddAllCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		}
 	}
 
-	private static class AddAllForCollectionOperation extends CompilationUnitRewriteOperation {
+	private static class AddAllForCollectionOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Statement toReplace;
 		private final Expression affectedCollection;
 		private final Expression addedData;

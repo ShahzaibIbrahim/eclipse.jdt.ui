@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.OrderedInfixExpression;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -118,11 +118,12 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 				+ "return Objects.hash(aShort);\n\n\n\n"; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-			+ "final int prime = 31;\n" //$NON-NLS-1$
-			+ "int result = 1;\n" //$NON-NLS-1$
-			+ "result = prime * result + aShort;\n" //$NON-NLS-1$
-			+ "return result;\n"; //$NON-NLS-1$
+		return """
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + aShort;
+			return result;
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -131,7 +132,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -510,7 +511,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.HashCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -528,7 +529,7 @@ public class HashCleanUp extends AbstractMultiFix implements ICleanUpFix {
 		return null;
 	}
 
-	private static class HashOperation extends CompilationUnitRewriteOperation {
+	private static class HashOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final MethodDeclaration node;
 		private final CollectedData data;
 

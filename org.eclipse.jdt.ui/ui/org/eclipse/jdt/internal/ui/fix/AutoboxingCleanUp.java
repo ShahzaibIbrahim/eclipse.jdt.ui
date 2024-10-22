@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -87,14 +87,16 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.USE_AUTOBOXING)) {
-			return "" //$NON-NLS-1$
-					+ "Integer i = 0;\n" //$NON-NLS-1$
-					+ "Character c = '*';\n"; //$NON-NLS-1$
+			return """
+				Integer i = 0;
+				Character c = '*';
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "Integer i = Integer.valueOf(0);\n" //$NON-NLS-1$
-				+ "Character c = Character.valueOf('*');\n"; //$NON-NLS-1$
+		return """
+			Integer i = Integer.valueOf(0);
+			Character c = Character.valueOf('*');
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -103,7 +105,7 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -186,7 +188,7 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.AutoboxingCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[rewriteOperations.size()]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[rewriteOperations.size()]));
 	}
 
 	@Override
@@ -199,7 +201,7 @@ public class AutoboxingCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class AutoboxingOperation extends CompilationUnitRewriteOperation {
+	private static class AutoboxingOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final ASTNode node;
 
 		private final ITypeBinding primitiveType;

@@ -67,7 +67,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -115,18 +115,20 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.STRINGBUILDER)) {
-			return "" //$NON-NLS-1$
-					+ "StringBuilder variable = new StringBuilder();\n" //$NON-NLS-1$
-					+ "variable.append(\"foo\");\n" //$NON-NLS-1$
-					+ "variable.append(\"bar\");\n" //$NON-NLS-1$
-					+ "System.out.println(variable.toString());\n"; //$NON-NLS-1$
+			return """
+				StringBuilder variable = new StringBuilder();
+				variable.append("foo");
+				variable.append("bar");
+				System.out.println(variable.toString());
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "String variable = \"\";\n" //$NON-NLS-1$
-				+ "variable = variable + \"foo\";\n" //$NON-NLS-1$
-				+ "variable += \"bar\";\n" //$NON-NLS-1$
-				+ "System.out.println(variable);\n"; //$NON-NLS-1$
+		return """
+			String variable = "";
+			variable = variable + "foo";
+			variable += "bar";
+			System.out.println(variable);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			class VarOccurrenceVisitor extends ASTVisitor {
@@ -526,7 +528,7 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.StringBuilderCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	private static InfixExpression asStringConcatenation(final Expression expression) {
@@ -555,7 +557,7 @@ public class StringBuilderCleanUp extends AbstractMultiFix implements ICleanUpFi
 		return null;
 	}
 
-	private static class StringBuilderOperation extends CompilationUnitRewriteOperation {
+	private static class StringBuilderOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private static final String APPEND_METHOD= "append"; //$NON-NLS-1$
 		private static final String TO_STRING_METHOD= "toString"; //$NON-NLS-1$
 		private static final String VALUE_OF_METHOD= "valueOf"; //$NON-NLS-1$

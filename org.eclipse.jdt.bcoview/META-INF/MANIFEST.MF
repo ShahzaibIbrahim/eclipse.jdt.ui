@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.bcoview;singleton:=true
-Bundle-Version: 1.2.500.qualifier
+Bundle-Version: 1.2.600.qualifier
 Bundle-ClassPath: .
 Bundle-Activator: org.eclipse.jdt.bcoview.BytecodeOutlinePlugin
 Bundle-Vendor: %providerName
@@ -11,7 +11,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.editors,
  org.eclipse.core.runtime,
  org.eclipse.jface.text,
- org.eclipse.jdt.core;bundle-version="3.34.0",
+ org.eclipse.jdt.core;bundle-version="[3.40.0,4.0.0)",
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.jdt.ui,
  org.eclipse.ui.ide,

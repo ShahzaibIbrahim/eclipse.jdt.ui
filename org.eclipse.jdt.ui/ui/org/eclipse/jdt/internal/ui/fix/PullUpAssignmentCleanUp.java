@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -93,9 +93,10 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PULL_UP_ASSIGNMENT)) {
-			return "" //$NON-NLS-1$
-					+ "isRemoved = list.remove(o);\n" //$NON-NLS-1$
-					+ "if (isRemoved) {}\n"; //$NON-NLS-1$
+			return """
+				isRemoved = list.remove(o);
+				if (isRemoved) {}
+				"""; //$NON-NLS-1$
 		}
 
 		return "" //$NON-NLS-1$
@@ -108,7 +109,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -283,7 +284,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.CodeStyleCleanUp_PullUpAssignment_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -296,7 +297,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class PullUpAssignmentOperation extends CompilationUnitRewriteOperation {
+	private static class PullUpAssignmentOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement visited;
 		private final Assignment assignment;
 		private final Expression leftHandSide;
@@ -328,7 +329,7 @@ public class PullUpAssignmentCleanUp extends AbstractMultiFix {
 		}
 	}
 
-	private static class MoveToDeclarationOperation extends CompilationUnitRewriteOperation {
+	private static class MoveToDeclarationOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Assignment assignment;
 		private final Expression leftHandSide;
 		private final VariableDeclarationFragment fragment;

@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -76,22 +76,26 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.MERGE_CONDITIONAL_BLOCKS)) {
-			return "" //$NON-NLS-1$
-					+ "if (isValid || (i != 1)) {\n" //$NON-NLS-1$
-					+ "    System.out.println(\"Duplicate\");\n" //$NON-NLS-1$
-					+ "} else {\n" //$NON-NLS-1$
-					+ "    System.out.println(\"Different\");\n" //$NON-NLS-1$
-					+ "}\n\n\n"; //$NON-NLS-1$
+			return """
+				if (isValid || (i != 1)) {
+				    System.out.println("Duplicate");
+				} else {
+				    System.out.println("Different");
+				}
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (isValid) {\n" //$NON-NLS-1$
-				+ "    System.out.println(\"Duplicate\");\n" //$NON-NLS-1$
-				+ "} else if (i == 1) {\n" //$NON-NLS-1$
-				+ "    System.out.println(\"Different\");\n" //$NON-NLS-1$
-				+ "} else {\n" //$NON-NLS-1$
-				+ "    System.out.println(\"Duplicate\");\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (isValid) {
+			    System.out.println("Duplicate");
+			} else if (i == 1) {
+			    System.out.println("Different");
+			} else {
+			    System.out.println("Duplicate");
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -100,7 +104,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -178,7 +182,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.MergeConditionalBlocksCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -191,7 +195,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class InnerIfOperation extends CompilationUnitRewriteOperation {
+	private static class InnerIfOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement visited;
 		private final IfStatement innerIf;
 		private final boolean isInnerMainFirst;
@@ -229,7 +233,7 @@ public class MergeConditionalBlocksCleanUp extends AbstractMultiFix {
 		}
 	}
 
-	private static class MergeConditionalBlocksOperation extends CompilationUnitRewriteOperation {
+	private static class MergeConditionalBlocksOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final List<IfStatement> duplicateIfBlocks;
 		private final List<Boolean> isThenStatement;
 

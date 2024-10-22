@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2018, 2023 IBM Corporation and others.
+ * Copyright (c) 2018, 2024 IBM Corporation and others.
  *
  * This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License 2.0
@@ -57,6 +57,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
+		options.setOption(SIMPLIFY_BOOLEAN_IF_ELSE, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
 		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
@@ -201,6 +202,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.TRUE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.TRUE);
@@ -240,6 +243,7 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(PULL_UP_ASSIGNMENT, CleanUpOptions.FALSE);
 
 		options.setOption(ELSE_IF, CleanUpOptions.FALSE);
+		options.setOption(SIMPLIFY_BOOLEAN_IF_ELSE, CleanUpOptions.FALSE);
 		options.setOption(REDUCE_INDENTATION, CleanUpOptions.FALSE);
 		options.setOption(INSTANCEOF, CleanUpOptions.FALSE);
 		options.setOption(NUMBER_SUFFIX, CleanUpOptions.FALSE);
@@ -386,6 +390,8 @@ public class CleanUpConstantsOptions extends CleanUpConstants {
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_PATH_SEPARATOR, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_FILE_ENCODING, CleanUpOptions.FALSE);
 		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_BOXED, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_RUNTIME_VERSION, CleanUpOptions.FALSE);
+		options.setOption(CONSTANTS_FOR_SYSTEM_PROPERTY_JAVA_SPECIFICATION_VERSION, CleanUpOptions.FALSE);
 
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_TO_ENHANCED, CleanUpOptions.FALSE);
 		options.setOption(CONTROL_STATEMENTS_CONVERT_FOR_LOOP_ONLY_IF_LOOP_VAR_USED, CleanUpOptions.FALSE);

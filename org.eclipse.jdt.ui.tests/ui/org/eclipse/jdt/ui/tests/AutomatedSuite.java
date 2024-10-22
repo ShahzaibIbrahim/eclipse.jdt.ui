@@ -14,15 +14,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests;
 
-import org.junit.Before;
-import org.junit.runner.RunWith;
-import org.junit.runners.Suite;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.platform.suite.api.SelectClasses;
+import org.junit.platform.suite.api.Suite;
 
 import org.eclipse.jdt.junit.launcher.JUnitLauncherTests;
 import org.eclipse.jdt.junit.tests.JUnitJUnitTests;
 import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.common.VisitorTest;
 
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
@@ -32,6 +34,7 @@ import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTestSuite;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
 import org.eclipse.jdt.ui.tests.hover.JavadocHoverTests;
+import org.eclipse.jdt.ui.tests.hover.MarkdownCommentTests;
 import org.eclipse.jdt.ui.tests.hover.PackageJavadocTests;
 import org.eclipse.jdt.ui.tests.jarexport.JarExportTests;
 import org.eclipse.jdt.ui.tests.model.ContentProviderTests;
@@ -50,8 +53,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Test all areas of JDT UI.
  */
-@RunWith(Suite.class)
-@Suite.SuiteClasses({
+@Suite
+@SelectClasses({
+	VisitorTest.class,
 	CoreTests.class,
 	CoreTestSuite.class,
 	QuickFixTestSuite.class,
@@ -82,10 +86,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 	JarExportTests.class,
 	PackageJavadocTests.class,
 	JavadocHoverTests.class,
+	MarkdownCommentTests.class,
 	SmokeViewsTest.class
 })
 public class AutomatedSuite {
-	@Before
+	@BeforeEach
 	protected void setUp() throws Exception {
 		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();

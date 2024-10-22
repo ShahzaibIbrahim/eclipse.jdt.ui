@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.dom.VarDefinitionsUsesVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -113,20 +113,22 @@ public class PatternCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.PRECOMPILE_REGEX)) {
-			return "" //$NON-NLS-1$
-					+ "Pattern dateCheck= Pattern.compile(\"\\\\d{4}-\\\\d{2}-\\\\d{2}\");\n" //$NON-NLS-1$
-					+ "dateCheck.matcher(\"2020-03-17\").matches();\n" //$NON-NLS-1$
-					+ "dateCheck.matcher(\"2020-03-17\").dateCheckplaceFirst(\"0000-00-00\");\n" //$NON-NLS-1$
-					+ "dateCheck.matcher(\"2020-03-17\").replaceAll(\"0000-00-00\");\n" //$NON-NLS-1$
-					+ "dateCheck.split(\"A2020-03-17B\");\n"; //$NON-NLS-1$
+			return """
+				Pattern dateCheck= Pattern.compile("\\\\d{4}-\\\\d{2}-\\\\d{2}");
+				dateCheck.matcher("2020-03-17").matches();
+				dateCheck.matcher("2020-03-17").dateCheckplaceFirst("0000-00-00");
+				dateCheck.matcher("2020-03-17").replaceAll("0000-00-00");
+				dateCheck.split("A2020-03-17B");
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "String dateCheck= \"\\\\d{4}-\\\\d{2}-\\\\d{2}\";\n" //$NON-NLS-1$
-				+ "\"2020-03-17\".matches(dateCheck);\n" //$NON-NLS-1$
-				+ "\"2020-03-17\".replaceFirst(dateCheck, \"0000-00-00\");\n" //$NON-NLS-1$
-				+ "\"2020-03-17\".replaceAll(dateCheck, \"0000-00-00\");\n" //$NON-NLS-1$
-				+ "\"A2020-03-17B\".split(dateCheck);\n"; //$NON-NLS-1$
+		return """
+			String dateCheck= "\\\\d{4}-\\\\d{2}-\\\\d{2}";
+			"2020-03-17".matches(dateCheck);
+			"2020-03-17".replaceFirst(dateCheck, "0000-00-00");
+			"2020-03-17".replaceAll(dateCheck, "0000-00-00");
+			"A2020-03-17B".split(dateCheck);
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -135,7 +137,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 		final Map<ASTNode, Set<String>> addedPatternFields= new HashMap<>();
 
 		unit.accept(new ASTVisitor() {
@@ -275,7 +277,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.PatternCleanup_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -288,7 +290,7 @@ public class PatternCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class PatternOperation extends CompilationUnitRewriteOperation {
+	private static class PatternOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final Type type;
 		private final Expression initializer;
 		private final List<SimpleName> regExUses;

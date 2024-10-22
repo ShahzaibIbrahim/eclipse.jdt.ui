@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTSemanticMatcher;
 import org.eclipse.jdt.internal.corext.dom.VarConflictVisitor;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
-import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFixCore.CompilationUnitRewriteOperationWithSourceRange;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModelCore;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
@@ -89,20 +89,24 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 	@Override
 	public String getPreview() {
 		if (isEnabled(CleanUpConstants.CONTROLFLOW_MERGE)) {
-			return "" //$NON-NLS-1$
-					+ "if (!isValid) {\n" //$NON-NLS-1$
-					+ "    j++;\n" //$NON-NLS-1$
-					+ "}\n" //$NON-NLS-1$
-					+ "++i;\n\n\n"; //$NON-NLS-1$
+			return """
+				if (!isValid) {
+				    j++;
+				}
+				++i;
+				
+				
+				"""; //$NON-NLS-1$
 		}
 
-		return "" //$NON-NLS-1$
-				+ "if (isValid) {\n" //$NON-NLS-1$
-				+ "    ++i;\n" //$NON-NLS-1$
-				+ "} else {\n" //$NON-NLS-1$
-				+ "    j++;\n" //$NON-NLS-1$
-				+ "    i = i + 1;\n" //$NON-NLS-1$
-				+ "}\n"; //$NON-NLS-1$
+		return """
+			if (isValid) {
+			    ++i;
+			} else {
+			    j++;
+			    i = i + 1;
+			}
+			"""; //$NON-NLS-1$
 	}
 
 	@Override
@@ -111,7 +115,7 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 			return null;
 		}
 
-		final List<CompilationUnitRewriteOperation> rewriteOperations= new ArrayList<>();
+		final List<CompilationUnitRewriteOperationWithSourceRange> rewriteOperations= new ArrayList<>();
 
 		unit.accept(new ASTVisitor() {
 			@Override
@@ -303,7 +307,7 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 		}
 
 		return new CompilationUnitRewriteOperationsFix(MultiFixMessages.ControlFlowMergeCleanUp_description, unit,
-				rewriteOperations.toArray(new CompilationUnitRewriteOperation[0]));
+				rewriteOperations.toArray(new CompilationUnitRewriteOperationWithSourceRange[0]));
 	}
 
 	@Override
@@ -316,7 +320,7 @@ public class ControlFlowMergeCleanUp extends AbstractMultiFix {
 		return null;
 	}
 
-	private static class ControlFlowMergeOperation extends CompilationUnitRewriteOperation {
+	private static class ControlFlowMergeOperation extends CompilationUnitRewriteOperationWithSourceRange {
 		private final IfStatement visited;
 		private final List<ASTNode> allCases;
 		private final List<List<Statement>> allCasesStatements;
